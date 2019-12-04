@@ -1,19 +1,12 @@
 package won.bot.skeleton.impl;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
-import com.opencsv.CSVReader;
-import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvValidationException;
@@ -24,30 +17,16 @@ import org.slf4j.LoggerFactory;
 import won.bot.framework.bot.base.EventBot;
 import won.bot.framework.eventbot.EventListenerContext;
 import won.bot.framework.eventbot.action.impl.LogAction;
-// import won.bot.framework.eventbot.action.impl.RandomDelayedAction;
 import won.bot.framework.eventbot.bus.EventBus;
-// import won.bot.framework.eventbot.event.impl.atomlifecycle.AtomCreatedEvent;
-// import won.bot.framework.eventbot.event.impl.lifecycle.ActEvent;
-// import won.bot.framework.extensions.matcher.MatcherBehaviour;
-// import won.bot.framework.extensions.matcher.MatcherExtension;
-// import won.bot.framework.extensions.matcher.MatcherExtensionAtomCreatedEvent;
 import won.bot.framework.extensions.serviceatom.ServiceAtomBehaviour;
 import won.bot.framework.extensions.serviceatom.ServiceAtomExtension;
 import won.protocol.message.WonMessage;
 import won.protocol.message.WonMessageBuilder;
 import won.protocol.service.WonNodeInformationService;
 import won.bot.framework.eventbot.event.impl.wonmessage.CloseFromOtherAtomEvent;
-// import
-// won.bot.framework.eventbot.event.impl.wonmessage.MessageFromOtherAtomEvent;
-// import
-// won.bot.framework.eventbot.event.impl.wonmessage.OpenFromOtherAtomEvent;
-// import won.bot.framework.eventbot.filter.impl.AtomUriInNamedListFilter;
-// import won.bot.framework.eventbot.filter.impl.NotFilter;
-// import won.bot.framework.eventbot.listener.BaseEventListener;
 import won.bot.framework.eventbot.listener.impl.ActionOnEventListener;
 
 import org.apache.jena.query.Dataset;
-// import won.protocol.model.SocketType;
 
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.bot.skeleton.utils.EdenredAtomModelWrapper;
@@ -76,8 +55,6 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
                                 EdenredDataPoint datapoint = datapointIter.next();
                                 logger.info("Einlösestelle: " + datapoint.getName());
                                 postAtom(ctx, datapoint);
-                                ;
-                                break; // TODO deleteme; to prevent spamming while debugging
                         }
                 } catch (IOException e) {
                         logger.error("Couldn't find or open CSV-file.");
