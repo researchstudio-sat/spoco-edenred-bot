@@ -20,6 +20,12 @@
         </dependency>
 
         <dependency>
+            <groupId>me.atlis</groupId>
+            <artifactId>nominatim-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
             <version>3.5.0</version>
