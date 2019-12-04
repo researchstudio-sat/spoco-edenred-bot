@@ -6,6 +6,8 @@ package won.bot.skeleton.utils;
 // import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
+
+import won.bot.skeleton.impl.model.EdenredDataPoint;
 // import won.protocol.util.DateTimeUtils;
 import won.protocol.util.DefaultAtomModelWrapper;
 import won.protocol.vocabulary.SCHEMA;
@@ -55,17 +57,17 @@ public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
     public static final Property GEO_SPATIAL = m.createProperty("https://w3id.org/won/content#geoSpatial");
     public static final Resource FOOD_ESTABLISHMENT = m.createResource(BASE_URI + "FoodEstablishment");
 
-    public EdenredAtomModelWrapper(String atomUri) {// , ContextRaid contextRaid) {
-        this(URI.create(atomUri));// , contextRaid);
+    public EdenredAtomModelWrapper(String atomUri, EdenredDataPoint datapoint) {// , ContextRaid contextRaid) {
+        this(URI.create(atomUri), datapoint);// , contextRaid);
     }
 
-    public EdenredAtomModelWrapper(URI atomUri) {// }, ContextRaid contextRaid) {
+    public EdenredAtomModelWrapper(URI atomUri, EdenredDataPoint datapoint) {// }, ContextRaid contextRaid) {
         super(atomUri);
         Resource atom = this.getAtomModel().createResource(atomUri.toString());
         // object.addProperty(RDF.type, SCHEMA.EVENT);
         // atom.addProperty(SCHEMA.OBJECT, object);
         atom.addProperty(RDF.type, WON.Atom);
-        atom.addProperty(DC.title, "hello world!");
+        atom.addProperty(DC.title, datapoint.getName());
         // move this to a s:location? or have multityping?
         atom.addProperty(RDF.type, FOOD_ESTABLISHMENT);
         atom.addProperty(TELEPHONE, "+43 661 23 45 678");
