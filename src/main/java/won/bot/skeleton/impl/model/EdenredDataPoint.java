@@ -51,4 +51,9 @@ public class EdenredDataPoint {
     public String getType() {
         return this.type;
     };
+
+    public String getCountryCode() {
+        // only for Austria atm
+        return "AT";
+    }
 }

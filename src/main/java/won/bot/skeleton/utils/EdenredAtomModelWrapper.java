@@ -70,9 +70,15 @@ public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
         atom.addProperty(DC.title, datapoint.getName());
         // move this to a s:location? or have multityping?
         atom.addProperty(RDF.type, FOOD_ESTABLISHMENT);
-        atom.addProperty(TELEPHONE, "+43 661 23 45 678");
-        atom.addProperty(SCHEMA.URL, "https://example.org/");
-        String onelineAddress = "Thurngasse 1, 1090 Wien, AT";
+        if (datapoint.getTelephone() != null) {
+            atom.addProperty(TELEPHONE, datapoint.getTelephone());
+        }
+        if (datapoint.getWebsite() != null) {
+            atom.addProperty(SCHEMA.URL, datapoint.getWebsite());
+        }
+        String onelineAddress = datapoint.getStreetAddress() + ", " + datapoint.getPostalCode() + " "
+                        + datapoint.getCity() + ", " + datapoint.getCountryCode();
+        // String onelineAddress = "Thurngasse 1, 1090 Wien, AT";
         Resource locationObject = atom.getModel().createResource();
         locationObject.addProperty(RDF.type, SCHEMA.PLACE);
         locationObject.addProperty(SCHEMA.NAME, onelineAddress);
@@ -82,6 +88,7 @@ public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
         DecimalFormat df = new DecimalFormat("##.######");
         df.setRoundingMode(RoundingMode.HALF_UP);
         df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
+        // TODO nominatim reverse lookup
         String lat = df.format(48.21831);
         String lon = df.format(16.358780);
         geoObject.addProperty(SCHEMA.LATITUDE, lat);
