@@ -14,36 +14,34 @@
   ~    limitations under the License.
   -->
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
     <bean id="echoBot" class="won.bot.skeleton.impl.SkeletonBot">
-        <property name="taskScheduler" ref="taskScheduler"/>
-        <property name="botContextWrapper" ref="botContextWrapper"/>
+        <property name="taskScheduler" ref="taskScheduler" />
+        <property name="botContextWrapper" ref="botContextWrapper" />
         <property name="atomProducer">
             <!-- since this bot does not create any atoms from other source, e.g rdf-files, mails etc, adding the NopAtomProducer will suffice, as it is never used -->
-            <bean class="won.bot.framework.component.atomproducer.impl.NopAtomProducer"/>
+            <bean class="won.bot.framework.component.atomproducer.impl.NopAtomProducer" />
         </property>
 
         <!--property name="nodeURISource" ref="nodeUriSourceRandom" /-->
-        <property name="matcherNodeURISource" ref="matcherNodeURISource"/>
-        <property name="matcherProtocolAtomServiceClient" ref="matcherProtocolAtomServiceClient"/>
-        <property name="matcherProtocolMatcherService" ref="matcherProtocolMatcherServiceJMSBased"/>
-        <property name="registrationMatcherRetryInterval" value="5000"/>
+        <property name="matcherNodeURISource" ref="matcherNodeURISource" />
+        <property name="matcherProtocolAtomServiceClient" ref="matcherProtocolAtomServiceClient" />
+        <property name="matcherProtocolMatcherService" ref="matcherProtocolMatcherServiceJMSBased" />
+        <property name="registrationMatcherRetryInterval" value="5000" />
 
         <property name="trigger">
             <bean class="org.springframework.scheduling.support.PeriodicTrigger">
-                <constructor-arg name="period" value="2000"/>
-                <constructor-arg name="timeUnit" value="MILLISECONDS"/>
-                <property name="initialDelay" value="10000"/> <!-- wait 10s at the beginning -->
-                <property name="fixedRate" value="false"/>  <!-- fixed delay after completion -->
+                <constructor-arg name="period" value="2000" />
+                <constructor-arg name="timeUnit" value="MILLISECONDS" />
+                <property name="initialDelay" value="10000" /> <!-- wait 10s at the beginning -->
+                <property name="fixedRate" value="false" /> <!-- fixed delay after completion -->
             </bean>
         </property>
     </bean>
 
-    <bean id="botContextWrapper" class="won.bot.framework.bot.context.BotContextWrapper">
-        <constructor-arg name="botContext" ref="${botContext.impl}"/>
-        <constructor-arg name="botName" value="${bot.name}"/>
+    <bean id="botContextWrapper" class="won.bot.skeleton.context.SkeletonBotContextWrapper">
+        <constructor-arg name="botContext" ref="${botContext.impl}" />
+        <constructor-arg name="botName" value="${bot.name}" />
     </bean>
 </beans>
