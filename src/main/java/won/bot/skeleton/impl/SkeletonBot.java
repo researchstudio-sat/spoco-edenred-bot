@@ -38,7 +38,7 @@ import org.apache.jena.query.Dataset;
 
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.bot.skeleton.utils.EdenredAtomModelWrapper;
-
+import won.bot.skeleton.utils.EdenredCsvReader;
 import won.bot.framework.eventbot.action.BaseEventBotAction;
 import won.bot.framework.eventbot.action.EventBotActionUtils;
 import won.bot.framework.eventbot.behaviour.ExecuteWonMessageCommandBehaviour;
@@ -78,15 +78,14 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         EventListenerContext ctx = getEventListenerContext();
         EventBus bus = getEventBus();
         bus.subscribe(CloseFromOtherAtomEvent.class,
-                new ActionOnEventListener(ctx, new LogAction(ctx, "received close message from remote atom.")));
-
+                        new ActionOnEventListener(ctx, new LogAction(ctx, "received close message from remote atom.")));
         bus.subscribe(CreateEdenredAtomEvent.class, new ActionOnEventListener(ctx, new CreateEdenredAtomAction(ctx)));
         // adapted from
         // https://github.com/researchstudio-sat/webofneeds/blob/refac__won_messages/
         // final Dataset data = new Data
         // ctx.getAtomProducer().create();
         try {
-            Iterator<EdenredDataPoint> datapointIter = loadCSV("data/result_list_3824_shortened.csv");
+            Iterator<EdenredDataPoint> datapointIter = EdenredCsvReader.stream("data/result_list_3824_shortened.csv");
             while (datapointIter.hasNext()) {
                 EdenredDataPoint datapoint = datapointIter.next();
                 logger.info("Einlösestelle: " + datapoint.getName());
@@ -108,16 +107,6 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         return null;
     }
 
-    private Iterator<EdenredDataPoint> loadCSV(String filePath) throws CsvValidationException, IOException {
-        // adapted from https://www.callicoder.com/java-read-write-csv-file-opencsv/
-        logger.info("in loadCSV");
-        Reader csvReader = Files.newBufferedReader(Paths.get(filePath));
-        CsvToBean<EdenredDataPoint> csvToBean = new CsvToBeanBuilder<EdenredDataPoint>(csvReader)
-                .withType(EdenredDataPoint.class).build();
-        Iterator<EdenredDataPoint> datapointIter = csvToBean.iterator();
-        return datapointIter;
-    }
-
     private void postAtom(EdenredDataPoint datapoint) {
         EventListenerContext ctx = getEventListenerContext();
         final URI wonNodeUri = ctx.getNodeURISource().getNodeURI(); // TODO check if this gets the env var
@@ -137,16 +126,13 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         // getEventListenerContext().getWonMessageSender().sendWonMessage(message); //
         // send it
         /*
-         * WonMessageSender sender = ctx.getWonMessageSender();
-         * 
-         * WonMessage createAtomMessage = ctx.getWonMessageSender()
+         * WonMessageSender sender = ctx.getWonMessageSender(); WonMessage
+         * createAtomMessage = ctx.getWonMessageSender()
          * .prepareMessage(createWonMessage(atomUri, wonNodeUri, dataset, false,
          * false)); getEventListenerContext().getWonMessageSender().sendWonMessage(
          * createAtomMessage); // send it
          */
-
     }
-
     // private void postAtom2(EdenredDataPoint datapoint) {
     // EventListenerContext ctx = getEventListenerContext();
     // //// DefaultAtomModelWrapper atomModelWrapper = new
@@ -178,7 +164,6 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
     // getEventListenerContext().getWonMessageSender().sendWonMessage(createAtomMessage);
     // }
 }
-
 // public class SkeletonBot extends EventBot implements MatcherExtension,
 // ServiceAtomExtension {
 // private static final Logger logger =
@@ -186,23 +171,19 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
 // private int registrationMatcherRetryInterval;
 // private MatcherBehaviour matcherBehaviour;
 // private ServiceAtomBehaviour serviceAtomBehaviour;
-
 // // bean setter, used by spring
 // public void setRegistrationMatcherRetryInterval(final int
 // registrationMatcherRetryInterval) {
 // this.registrationMatcherRetryInterval = registrationMatcherRetryInterval;
 // }
-
 // @Override
 // public ServiceAtomBehaviour getServiceAtomBehaviour() {
 // return serviceAtomBehaviour;
 // }
-
 // @Override
 // public MatcherBehaviour getMatcherBehaviour() {
 // return matcherBehaviour;
 // }
-
 // @Override
 // protected void initializeEventListeners() {
 // EventListenerContext ctx = getEventListenerContext();
