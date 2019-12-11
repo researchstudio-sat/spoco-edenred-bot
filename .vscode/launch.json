@@ -6,7 +6,7 @@
       "request": "launch",
       "mainClass": "won.bot.skeleton.CsvEnricher",
       "projectName": "skeleton",
-      "args": "data/result_list_3824_shortened.csv data/test.csv rsinger+nominatim@researchstudio.at"
+      "args": "data/result_list_3824_shortened.csv data/enriched_shortened.csv rsinger+nominatim@researchstudio.at"
     }
   ]
 }
