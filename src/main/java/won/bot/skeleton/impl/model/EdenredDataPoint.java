@@ -3,6 +3,17 @@ package won.bot.skeleton.impl.model;
 import com.opencsv.bean.CsvBindByName;
 
 public class EdenredDataPoint {
+    public EdenredDataPoint() {
+        /* for opencsv-parsing; don't use otherwise */
+    }
+
+    public EdenredDataPoint(String name, String streetAddress, String postalCode, String city) {
+        this.name = name;
+        this.streetAddress = streetAddress;
+        this.postalCode = postalCode;
+        this.city = city;
+    }
+
     @CsvBindByName(column = "Einlösestelle", required = true)
     private String name;
 

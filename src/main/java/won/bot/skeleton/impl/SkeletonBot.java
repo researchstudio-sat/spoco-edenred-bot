@@ -1,68 +1,33 @@
 package won.bot.skeleton.impl;
 
+import com.opencsv.exceptions.CsvValidationException;
 import java.io.IOException;
-import java.io.Reader;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.exceptions.CsvValidationException;
-import java.lang.invoke.MethodHandles;
-import java.net.URI;
-
+import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import won.bot.framework.eventbot.action.impl.atomlifecycle.AbstractCreateAtomAction;
 import won.bot.framework.bot.base.EventBot;
 import won.bot.framework.eventbot.EventListenerContext;
 import won.bot.framework.eventbot.action.impl.LogAction;
 import won.bot.framework.eventbot.bus.EventBus;
-import won.bot.framework.extensions.serviceatom.ServiceAtomBehaviour;
-import won.bot.framework.extensions.serviceatom.ServiceAtomExtension;
-import won.protocol.message.WonMessage;
-import won.protocol.message.builder.WonMessageBuilder;
-import won.protocol.message.sender.WonMessageSender;
-import won.protocol.service.WonNodeInformationService;
-import won.protocol.util.DefaultAtomModelWrapper;
-import won.protocol.vocabulary.WXCHAT;
 import won.bot.framework.eventbot.event.impl.wonmessage.CloseFromOtherAtomEvent;
 import won.bot.framework.eventbot.listener.impl.ActionOnEventListener;
-
-import org.apache.jena.query.Dataset;
-
-import won.bot.skeleton.impl.model.EdenredDataPoint;
-import won.bot.skeleton.utils.EdenredAtomModelWrapper;
-import won.bot.skeleton.utils.EdenredCsvReader;
-import won.bot.framework.eventbot.action.BaseEventBotAction;
-import won.bot.framework.eventbot.action.EventBotActionUtils;
-import won.bot.framework.eventbot.behaviour.ExecuteWonMessageCommandBehaviour;
-import won.bot.framework.eventbot.bus.EventBus;
-import won.bot.framework.eventbot.event.Event;
-import won.bot.framework.eventbot.event.impl.command.connect.ConnectCommandEvent;
-import won.bot.framework.eventbot.event.impl.command.connect.ConnectCommandResultEvent;
-import won.bot.framework.eventbot.event.impl.command.connect.ConnectCommandSuccessEvent;
-import won.bot.framework.eventbot.event.impl.wonmessage.CloseFromOtherAtomEvent;
-import won.bot.framework.eventbot.event.impl.wonmessage.ConnectFromOtherAtomEvent;
-import won.bot.framework.eventbot.filter.impl.AtomUriInNamedListFilter;
-import won.bot.framework.eventbot.filter.impl.CommandResultFilter;
-import won.bot.framework.eventbot.filter.impl.NotFilter;
-import won.bot.framework.eventbot.listener.EventListener;
-import won.bot.framework.eventbot.listener.impl.ActionOnFirstEventListener;
-import won.bot.framework.extensions.matcher.MatcherBehaviour;
-import won.bot.framework.extensions.matcher.MatcherExtension;
-import won.bot.framework.extensions.matcher.MatcherExtensionAtomCreatedEvent;
 import won.bot.framework.extensions.serviceatom.ServiceAtomBehaviour;
 import won.bot.framework.extensions.serviceatom.ServiceAtomExtension;
 import won.bot.skeleton.action.CreateEdenredAtomAction;
-import won.bot.skeleton.action.MatcherExtensionAtomCreatedAction;
-import won.bot.skeleton.context.SkeletonBotContextWrapper;
 import won.bot.skeleton.event.CreateEdenredAtomEvent;
+import won.bot.skeleton.impl.model.EdenredDataPoint;
+import won.bot.skeleton.utils.EdenredAtomModelWrapper;
+import won.bot.skeleton.utils.EdenredCsvReader;
+import won.protocol.service.WonNodeInformationService;
+
+
+
+
+
 
 public class SkeletonBot extends EventBot implements ServiceAtomExtension {
     private static final Logger logger = LoggerFactory.getLogger(SkeletonBot.class);
@@ -85,7 +50,9 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         // final Dataset data = new Data
         // ctx.getAtomProducer().create();
         try {
-            Iterator<EdenredDataPoint> datapointIter = EdenredCsvReader.stream("data/result_list_3824_shortened.csv");
+            Iterator<EdenredDataPoint> datapointIter = EdenredCsvReader
+                            // .readStream("data/test.csv");
+                            .readStream("data/result_list_3824_shortened.csv");
             while (datapointIter.hasNext()) {
                 EdenredDataPoint datapoint = datapointIter.next();
                 logger.info("Einlösestelle: " + datapoint.getName());

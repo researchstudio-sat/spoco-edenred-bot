@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - CsvEnricher",
+            "request": "launch",
+            "mainClass": "won.bot.skeleton.CsvEnricher",
+            "projectName": "skeleton"
+        }
+    ]
+}
