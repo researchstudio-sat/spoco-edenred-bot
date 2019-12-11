@@ -6,14 +6,15 @@ import com.opencsv.exceptions.CsvValidationException;
 import fr.dudie.nominatim.client.JsonNominatimClient;
 import fr.dudie.nominatim.model.Address;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.bot.skeleton.utils.EdenredCsvIO;
+
 
 /**
  * Class to e.g. do the nominatim reverse lookup and store the results in the
@@ -26,45 +27,47 @@ public class CsvEnricher {
         readTest();
     }
 
-    public static void nominatimTest() {
-        String email = "rsinger+nominatim@researchstudio.at";
-        EdenredDataPoint dp = new EdenredDataPoint("A place", "Thurngasse 1", "1090", "Vienna");
-        Address a = nominatimReverseLookup(dp, email);
-        logger.info("Nominatim result: " + a.getDisplayName() + " " + a.getLongitude() + " - " + a.getLatitude());
-    }
-
-
     public static void readTest() {
         String filenameIn = "data/result_list_3824_shortened.csv";
+        String filenameOut = "data/test.csv";
         String email = "rsinger+nominatim@researchstudio.at";
+        List<EdenredDataPoint> data = null;
         try {
-            List<EdenredDataPoint> datapoints = EdenredCsvIO.read(filenameIn);
-            for(EdenredDataPoint datapoint : datapoints) {
-                logger.info("Einlösestelle: " + datapoint.getName());
-                // Address a = nominatimReverseLookup(datapoint, email);
-                // if(a != null) {
-                //     logger.info("Nominatim result: " + a.getDisplayName() + " " + a.getLongitude() + " - " + a.getLatitude());
-                // }
-            }
+            data = EdenredCsvIO.read(filenameIn);
         } catch (IOException e) {
             logger.error("Couldn't find or open CSV-file.");
         } catch (CsvValidationException e) {
             logger.error("Couldn't parse CSV-file.");
         }
-    }
-    public static void writeTest() {
+        if(data != null) {
+            // enrich data with geo-coordinates
+            List<EdenredDataPoint> enrichedData = data.stream().map(dp -> enrichDataPoint(dp, email)).collect(Collectors.toList());
 
-        String filenameOut = "data/test.csv";
-        try {
-            List<EdenredDataPoint> data = new LinkedList<EdenredDataPoint>();
-            data.add(new EdenredDataPoint("A place", "Yellow Brick Rd 1", "1234", "Oz"));
-            EdenredCsvIO.write(filenameOut, data);
-        } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
-            logger.error("Failed to write csv. " + e.getMessage() + "\n");
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // write enriched data
+            try {
+                EdenredCsvIO.write(filenameOut, enrichedData);
+            } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
+                logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
+                e.printStackTrace();
+            }
         }
     }
+
+    /**
+     * Clone and add lon/lat if the reverse lookup was successful
+     * @param datapoint
+     * @param email
+     * @return
+     */
+    public static EdenredDataPoint enrichDataPoint(EdenredDataPoint datapoint, String email) {
+        Address a = nominatimReverseLookup(datapoint, email);
+        if (a != null) {
+            return new EdenredDataPoint(datapoint, a.getLongitude(), a.getLatitude());
+        } else {
+            return new EdenredDataPoint(datapoint);
+        }
+    }
+
 
     /**
      * @param datapoint
