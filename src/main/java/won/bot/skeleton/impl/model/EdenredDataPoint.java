@@ -13,6 +13,34 @@ public class EdenredDataPoint {
         this.city = city;
     }
 
+    /**
+     * Copy constructor.
+     * @param dp
+     */
+    public EdenredDataPoint(EdenredDataPoint dp) {
+        this.city = dp.city;
+        this.latitude = dp.latitude;
+        this.longitude = dp.longitude;
+        this.name = dp.name;
+        this.postalCode = dp.postalCode;
+        this.streetAddress = dp.streetAddress;
+        this.telephone = dp.telephone;
+        this.type = dp.type;
+        this.website = dp.website;
+    }
+
+    /**
+     * Copies the datapoint and adds lon and lat to the copy.
+     * @param dp
+     * @param lon
+     * @param lat
+     */
+    public EdenredDataPoint(EdenredDataPoint dp, double lon, double lat) {
+        this(dp);
+        this.longitude = lon;
+        this.latitude = lat;
+    }
+
     @CsvBindByName(column = "Einlösestelle", required = true)
     private String name;
 
@@ -84,5 +112,20 @@ public class EdenredDataPoint {
     public String getOnelineAddress() {
         return this.getStreetAddress() + ", " + this.getPostalCode() + " "
                         + this.getCity() + ", " + this.getCountryCode();
+    }
+
+    @Override
+    public String toString() {
+        return "EdenredDatePoint@{ " +
+            "city: \"" + this.city + "\", " +
+            "latitude: " + this.latitude + ", " +
+            "longitude: " + this.longitude + ", " +
+            "name: \"" + this.name + "\", " +
+            "postalCode: \"" + this.postalCode + "\", " +
+            "streetAddress: \"" + this.streetAddress + "\", " +
+            "telephone: \"" + this.telephone + "\", " +
+            "type: \"" + this.type + "\", " +
+            "website: \"" + this.website +  "\"" +
+            " }";
     }
 }
