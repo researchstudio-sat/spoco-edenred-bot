@@ -4,37 +4,37 @@ package won.bot.skeleton.utils;
 // import org.apache.jena.datatypes.BaseDatatype;
 // import org.apache.jena.datatypes.RDFDatatype;
 // import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.DC;
-import org.apache.jena.vocabulary.RDF;
-
-import won.bot.skeleton.impl.model.EdenredDataPoint;
-// import won.protocol.util.DateTimeUtils;
-import won.protocol.util.DefaultAtomModelWrapper;
-import won.protocol.vocabulary.SCHEMA;
-import won.protocol.vocabulary.WON;
-import won.protocol.vocabulary.WONCON;
-import won.protocol.vocabulary.WONMATCH;
-import won.protocol.vocabulary.WXCHAT;
-// import won.protocol.vocabulary.WONCON;
-// import won.protocol.vocabulary.WONMATCH;
-// import won.protocol.vocabulary.WXGROUP;
-
 import java.math.RoundingMode;
-// import java.math.RoundingMode;
 import java.net.URI;
-// import java.text.DecimalFormat;
-// import java.text.DecimalFormatSymbols;
-// import java.util.Locale;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.DC;
+import org.apache.jena.vocabulary.RDF;
+import won.bot.skeleton.impl.model.EdenredDataPoint;
+import won.protocol.util.DefaultAtomModelWrapper;
+import won.protocol.vocabulary.SCHEMA;
+import won.protocol.vocabulary.WON;
+import won.protocol.vocabulary.WONCON;
+import won.protocol.vocabulary.WONMATCH;
+import won.protocol.vocabulary.WXCHAT;
+
+// import won.protocol.util.DateTimeUtils;
+// import won.protocol.vocabulary.WONCON;
+// import won.protocol.vocabulary.WONMATCH;
+// import won.protocol.vocabulary.WXGROUP;
+
+// import java.math.RoundingMode;
+// import java.text.DecimalFormat;
+// import java.text.DecimalFormatSymbols;
+// import java.util.Locale;
+
 
 public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
     private static Model m = ModelFactory.createDefaultModel(); // TODO or getAtomModel() from DefaultAtomModel
@@ -76,12 +76,9 @@ public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
         if (datapoint.getWebsite() != null) {
             atom.addProperty(SCHEMA.URL, datapoint.getWebsite());
         }
-        String onelineAddress = datapoint.getStreetAddress() + ", " + datapoint.getPostalCode() + " "
-                        + datapoint.getCity() + ", " + datapoint.getCountryCode();
-        // String onelineAddress = "Thurngasse 1, 1090 Wien, AT";
         Resource locationObject = atom.getModel().createResource();
         locationObject.addProperty(RDF.type, SCHEMA.PLACE);
-        locationObject.addProperty(SCHEMA.NAME, onelineAddress);
+        locationObject.addProperty(SCHEMA.NAME, datapoint.getOnelineAddress());
         Resource geoObject = locationObject.getModel().createResource();
         geoObject.addProperty(RDF.type, SCHEMA.GEOCOORDINATES);
         // ---

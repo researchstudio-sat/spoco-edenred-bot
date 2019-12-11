@@ -3,9 +3,8 @@ package won.bot.skeleton.impl.model;
 import com.opencsv.bean.CsvBindByName;
 
 public class EdenredDataPoint {
-    public EdenredDataPoint() {
-        /* for opencsv-parsing; don't use otherwise */
-    }
+    /**  for opencsv-parsing; don't use otherwise */
+    public EdenredDataPoint() { }
 
     public EdenredDataPoint(String name, String streetAddress, String postalCode, String city) {
         this.name = name;
@@ -80,5 +79,10 @@ public class EdenredDataPoint {
     public String getCountryCode() {
         // only for Austria atm
         return "AT";
+    }
+
+    public String getOnelineAddress() {
+        return this.getStreetAddress() + ", " + this.getPostalCode() + " "
+                        + this.getCity() + ", " + this.getCountryCode();
     }
 }
