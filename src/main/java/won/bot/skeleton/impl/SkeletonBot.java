@@ -45,16 +45,15 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         // final Dataset data = new Data
         // ctx.getAtomProducer().create();
         try {
-            Iterator<EdenredDataPoint> datapointIter = EdenredCsvIO
+            List<EdenredDataPoint> datapoints = EdenredCsvIO
                             // .readStream("data/test.csv");
-                            .readStream("data/result_list_3824_shortened.csv");
-            while (datapointIter.hasNext()) {
-                EdenredDataPoint datapoint = datapointIter.next();
+                            .read("data/result_list_3824_shortened.csv");
+            for(EdenredDataPoint datapoint : datapoints) {
                 logger.info("Einlösestelle: " + datapoint.getName());
                 // postAtom(datapoint);
                 // postAtom2(datapoint);
                 bus.publish(new CreateEdenredAtomEvent(datapoint));
-                break;
+                break; // TODO deleteme
             }
         } catch (IOException e) {
             logger.error("Couldn't find or open CSV-file.");

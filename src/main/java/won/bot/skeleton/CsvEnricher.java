@@ -1,50 +1,19 @@
 package won.bot.skeleton;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.LinkedList;
-
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.exceptions.CsvValidationException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import won.bot.framework.bot.base.EventBot;
-import won.bot.framework.eventbot.EventListenerContext;
-import won.bot.framework.eventbot.action.impl.LogAction;
-import won.bot.framework.eventbot.bus.EventBus;
-import won.bot.framework.extensions.serviceatom.ServiceAtomBehaviour;
-import won.bot.framework.extensions.serviceatom.ServiceAtomExtension;
-import won.protocol.message.WonMessage;
-// import won.protocol.message.WonMessageBuilder;
-import won.protocol.service.WonNodeInformationService;
-import won.bot.framework.eventbot.event.impl.wonmessage.CloseFromOtherAtomEvent;
-import won.bot.framework.eventbot.listener.impl.ActionOnEventListener;
-
-import org.apache.jena.query.Dataset;
-
-import won.bot.skeleton.impl.model.EdenredDataPoint;
-import won.bot.skeleton.utils.EdenredAtomModelWrapper;
-import won.bot.skeleton.utils.EdenredCsvIO;
-
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-
+import com.opencsv.exceptions.CsvValidationException;
+import fr.dudie.nominatim.client.JsonNominatimClient;
+import fr.dudie.nominatim.model.Address;
 import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import won.bot.skeleton.impl.model.EdenredDataPoint;
+import won.bot.skeleton.utils.EdenredCsvIO;
 
 /**
  * Class to e.g. do the nominatim reverse lookup and store the results in the
@@ -54,14 +23,71 @@ public class CsvEnricher {
     private static final Logger logger = LoggerFactory.getLogger(CsvEnricher.class);
 
     public static void main(String[] args) {
+        readTest();
+    }
+
+    public static void nominatimTest() {
+        String email = "rsinger+nominatim@researchstudio.at";
+        EdenredDataPoint dp = new EdenredDataPoint("A place", "Thurngasse 1", "1090", "Vienna");
+        Address a = nominatimReverseLookup(dp, email);
+        logger.info("Nominatim result: " + a.getDisplayName() + " " + a.getLongitude() + " - " + a.getLatitude());
+    }
+
+
+    public static void readTest() {
+        String filenameIn = "data/result_list_3824_shortened.csv";
+        String email = "rsinger+nominatim@researchstudio.at";
+        try {
+            List<EdenredDataPoint> datapoints = EdenredCsvIO.read(filenameIn);
+            for(EdenredDataPoint datapoint : datapoints) {
+                logger.info("Einlösestelle: " + datapoint.getName());
+                // Address a = nominatimReverseLookup(datapoint, email);
+                // if(a != null) {
+                //     logger.info("Nominatim result: " + a.getDisplayName() + " " + a.getLongitude() + " - " + a.getLatitude());
+                // }
+            }
+        } catch (IOException e) {
+            logger.error("Couldn't find or open CSV-file.");
+        } catch (CsvValidationException e) {
+            logger.error("Couldn't parse CSV-file.");
+        }
+    }
+    public static void writeTest() {
+
+        String filenameOut = "data/test.csv";
         try {
             List<EdenredDataPoint> data = new LinkedList<EdenredDataPoint>();
             data.add(new EdenredDataPoint("A place", "Yellow Brick Rd 1", "1234", "Oz"));
-            EdenredCsvIO.write("data/test.csv", data);
+            EdenredCsvIO.write(filenameOut, data);
         } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
             logger.error("Failed to write csv. " + e.getMessage() + "\n");
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @param datapoint
+     * @param email
+     * @return the first nominatim address, if there's at least one result
+     */
+    public static Address nominatimReverseLookup(EdenredDataPoint datapoint, String email) {
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        JsonNominatimClient nominatim = new JsonNominatimClient(httpClient, email);
+        List<Address> reverseLookupResults;
+        try {
+            reverseLookupResults = nominatim.search(datapoint.getOnelineAddress());
+            if(reverseLookupResults.size() > 0) {
+                Address a = reverseLookupResults.get(0);
+                return a;
+            } else {
+                logger.debug("No results found on nominatim for: " + datapoint.getOnelineAddress());
+            }
+
+        } catch (IOException e) {
+            logger.error("Couldn't establish connection to nominatim");
+            e.printStackTrace();
+        }
+        return null;
     }
 }
