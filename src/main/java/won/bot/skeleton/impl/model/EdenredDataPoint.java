@@ -91,16 +91,16 @@ public class EdenredDataPoint {
     };
 
     @CsvBindByName(column = "Longitude", required = false)
-    private double longitude;
+    private Double longitude;
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return this.longitude;
     }
 
     @CsvBindByName(column = "Latitude", required = false)
-    private double latitude;
+    private Double latitude;
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return this.latitude;
     }
 
