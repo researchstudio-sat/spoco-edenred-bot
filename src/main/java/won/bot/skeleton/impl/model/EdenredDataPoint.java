@@ -63,6 +63,20 @@ public class EdenredDataPoint {
         return this.type;
     };
 
+    @CsvBindByName(column = "Longitude", required = false)
+    private double longitude;
+
+    public double getLongitude() {
+        return this.longitude;
+    }
+
+    @CsvBindByName(column = "Latitude", required = false)
+    private double latitude;
+
+    public double getLatitude() {
+        return this.latitude;
+    }
+
     public String getCountryCode() {
         // only for Austria atm
         return "AT";
