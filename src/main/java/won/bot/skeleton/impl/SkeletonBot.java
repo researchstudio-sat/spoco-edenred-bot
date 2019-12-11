@@ -21,13 +21,8 @@ import won.bot.skeleton.action.CreateEdenredAtomAction;
 import won.bot.skeleton.event.CreateEdenredAtomEvent;
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.bot.skeleton.utils.EdenredAtomModelWrapper;
-import won.bot.skeleton.utils.EdenredCsvReader;
+import won.bot.skeleton.utils.EdenredCsvIO;
 import won.protocol.service.WonNodeInformationService;
-
-
-
-
-
 
 public class SkeletonBot extends EventBot implements ServiceAtomExtension {
     private static final Logger logger = LoggerFactory.getLogger(SkeletonBot.class);
@@ -50,7 +45,7 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         // final Dataset data = new Data
         // ctx.getAtomProducer().create();
         try {
-            Iterator<EdenredDataPoint> datapointIter = EdenredCsvReader
+            Iterator<EdenredDataPoint> datapointIter = EdenredCsvIO
                             // .readStream("data/test.csv");
                             .readStream("data/result_list_3824_shortened.csv");
             while (datapointIter.hasNext()) {

@@ -28,8 +28,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EdenredCsvReader {
-    private static final Logger logger = LoggerFactory.getLogger(EdenredCsvReader.class);
+public class EdenredCsvIO {
+    private static final Logger logger = LoggerFactory.getLogger(EdenredCsvIO.class);
 
     public static Iterator<EdenredDataPoint> readStream(String filePath) throws CsvValidationException, IOException {
         // adapted from https://www.callicoder.com/java-read-write-csv-file-opencsv/

@@ -31,7 +31,7 @@ import org.apache.jena.query.Dataset;
 
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.bot.skeleton.utils.EdenredAtomModelWrapper;
-import won.bot.skeleton.utils.EdenredCsvReader;
+import won.bot.skeleton.utils.EdenredCsvIO;
 
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -57,7 +57,7 @@ public class CsvEnricher {
         try {
             List<EdenredDataPoint> data = new LinkedList<EdenredDataPoint>();
             data.add(new EdenredDataPoint("A place", "Yellow Brick Rd 1", "1234", "Oz"));
-            EdenredCsvReader.write("data/test.csv", data);
+            EdenredCsvIO.write("data/test.csv", data);
         } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
             logger.error("Failed to write csv. " + e.getMessage() + "\n");
             // TODO Auto-generated catch block
