@@ -17,6 +17,8 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.protocol.util.DefaultAtomModelWrapper;
 import won.protocol.vocabulary.SCHEMA;
@@ -37,6 +39,7 @@ import won.protocol.vocabulary.WXCHAT;
 
 
 public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
+    private static final Logger logger = LoggerFactory.getLogger(EdenredAtomModelWrapper.class);
     private static Model m = ModelFactory.createDefaultModel(); // TODO or getAtomModel() from DefaultAtomModel
     public static final String BASE_URI = SCHEMA.BASE_URI;
     public static final String DEFAULT_PREFIX = SCHEMA.DEFAULT_PREFIX;
@@ -70,30 +73,37 @@ public class EdenredAtomModelWrapper extends DefaultAtomModelWrapper {
         atom.addProperty(DC.title, datapoint.getName());
         // move this to a s:location? or have multityping?
         atom.addProperty(RDF.type, FOOD_ESTABLISHMENT);
+
         if (datapoint.getTelephone() != null) {
             atom.addProperty(TELEPHONE, datapoint.getTelephone());
         }
+
         if (datapoint.getWebsite() != null) {
             atom.addProperty(SCHEMA.URL, datapoint.getWebsite());
         }
+
         Resource locationObject = atom.getModel().createResource();
         locationObject.addProperty(RDF.type, SCHEMA.PLACE);
         locationObject.addProperty(SCHEMA.NAME, datapoint.getOnelineAddress());
-        Resource geoObject = locationObject.getModel().createResource();
-        geoObject.addProperty(RDF.type, SCHEMA.GEOCOORDINATES);
-        // ---
-        DecimalFormat df = new DecimalFormat("##.######");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
-        // TODO nominatim reverse lookup
-        String lat = df.format(48.21831);
-        String lon = df.format(16.358780);
-        geoObject.addProperty(SCHEMA.LATITUDE, lat);
-        geoObject.addProperty(SCHEMA.LONGITUDE, lon);
-        RDFDatatype bigdata_geoSpatialDatatype = new BaseDatatype(
-                        "http://www.bigdata.com/rdf/geospatial/literals/v1#lat-lon");
-        geoObject.addProperty(WONCON.geoSpatial, lat + "#" + lon, bigdata_geoSpatialDatatype);
-        locationObject.addProperty(SCHEMA.GEO, geoObject);
+
+        if(datapoint.getLongitude() != null && datapoint.getLatitude() != null) {
+            DecimalFormat df = new DecimalFormat("##.######");
+            df.setRoundingMode(RoundingMode.HALF_UP);
+            df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
+
+            Resource geoObject = locationObject.getModel().createResource();
+            geoObject.addProperty(RDF.type, SCHEMA.GEOCOORDINATES);
+
+            String lat = df.format(datapoint.getLatitude());
+            String lon = df.format(datapoint.getLongitude());
+            geoObject.addProperty(SCHEMA.LATITUDE, lat);
+            geoObject.addProperty(SCHEMA.LONGITUDE, lon);
+            RDFDatatype bigdata_geoSpatialDatatype = new BaseDatatype(
+                            "http://www.bigdata.com/rdf/geospatial/literals/v1#lat-lon");
+            geoObject.addProperty(WONCON.geoSpatial, lat + "#" + lon, bigdata_geoSpatialDatatype);
+
+            locationObject.addProperty(SCHEMA.GEO, geoObject);
+        }
         atom.addProperty(SCHEMA.LOCATION, locationObject);
         // ---
         this.addTag("Edenred");

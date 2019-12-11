@@ -3,7 +3,6 @@ package won.bot.skeleton.impl;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.jena.query.Dataset;
@@ -40,20 +39,12 @@ public class SkeletonBot extends EventBot implements ServiceAtomExtension {
         bus.subscribe(CloseFromOtherAtomEvent.class,
                         new ActionOnEventListener(ctx, new LogAction(ctx, "received close message from remote atom.")));
         bus.subscribe(CreateEdenredAtomEvent.class, new ActionOnEventListener(ctx, new CreateEdenredAtomAction(ctx)));
-        // adapted from
-        // https://github.com/researchstudio-sat/webofneeds/blob/refac__won_messages/
-        // final Dataset data = new Data
-        // ctx.getAtomProducer().create();
         try {
             List<EdenredDataPoint> datapoints = EdenredCsvIO
-                            // .readStream("data/test.csv");
-                            .read("data/result_list_3824_shortened.csv");
-            for(EdenredDataPoint datapoint : datapoints) {
-                logger.info("Einlösestelle: " + datapoint.getName());
-                // postAtom(datapoint);
-                // postAtom2(datapoint);
+                            .read("data/enriched_shortened.csv");
+            for (EdenredDataPoint datapoint : datapoints) {
+                logger.info("Publishing for edenred restaurant: " + datapoint.getName());
                 bus.publish(new CreateEdenredAtomEvent(datapoint));
-                break; // TODO deleteme
             }
         } catch (IOException e) {
             logger.error("Couldn't find or open CSV-file.");
