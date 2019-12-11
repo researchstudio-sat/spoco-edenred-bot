@@ -1,11 +1,12 @@
 {
-    "configurations": [
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - CsvEnricher",
-            "request": "launch",
-            "mainClass": "won.bot.skeleton.CsvEnricher",
-            "projectName": "skeleton"
-        }
-    ]
+  "configurations": [
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - CsvEnricher",
+      "request": "launch",
+      "mainClass": "won.bot.skeleton.CsvEnricher",
+      "projectName": "skeleton",
+      "args": "data/result_list_3824_shortened.csv data/test.csv rsinger+nominatim@researchstudio.at"
+    }
+  ]
 }

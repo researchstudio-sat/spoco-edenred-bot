@@ -24,13 +24,18 @@ public class CsvEnricher {
     private static final Logger logger = LoggerFactory.getLogger(CsvEnricher.class);
 
     public static void main(String[] args) {
-        readTest();
-    }
+        //////////// PROCESS ARGS
 
-    public static void readTest() {
-        String filenameIn = "data/result_list_3824_shortened.csv";
-        String filenameOut = "data/test.csv";
-        String email = "rsinger+nominatim@researchstudio.at";
+        if(args.length != 3) {
+            logger.info("Usage: csvenricher in.csv out.csv email-for-nominatim@example.org");
+            return;
+        }
+        String filenameIn = args[0];
+        String filenameOut = args[1];
+        String email = args[2];
+
+        //////////// READ DATA
+
         List<EdenredDataPoint> data = null;
         try {
             data = EdenredCsvIO.read(filenameIn);
@@ -40,15 +45,22 @@ public class CsvEnricher {
             logger.error("Couldn't parse CSV-file.");
         }
         if(data != null) {
-            // enrich data with geo-coordinates
+
+            //////////// ENRICH DATA WITH GEO-COORDINATES
+
             List<EdenredDataPoint> enrichedData = data.stream().map(dp -> enrichDataPoint(dp, email)).collect(Collectors.toList());
 
-            // write enriched data
+            //////////// WRITE ENRICHED DATA
+            
             try {
                 EdenredCsvIO.write(filenameOut, enrichedData);
             } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
                 logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
                 e.printStackTrace();
+            }
+
+            for(EdenredDataPoint dp : enrichedData){
+                logger.info("ENRICHED TO: " + dp.toString());
             }
         }
     }
