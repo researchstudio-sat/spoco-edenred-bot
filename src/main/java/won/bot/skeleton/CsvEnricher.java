@@ -6,6 +6,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import fr.dudie.nominatim.client.JsonNominatimClient;
 import fr.dudie.nominatim.model.Address;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.http.client.HttpClient;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 import won.bot.skeleton.utils.EdenredCsvIO;
 
-
 /**
  * Class to e.g. do the nominatim reverse lookup and store the results in the
  * CSV for later consumption. Run this before running the bot.
@@ -24,9 +24,9 @@ public class CsvEnricher {
     private static final Logger logger = LoggerFactory.getLogger(CsvEnricher.class);
 
     public static void main(String[] args) {
-        //////////// PROCESS ARGS
 
-        if(args.length != 3) {
+        //////////// PROCESS ARGS
+        if (args.length != 3) {
             logger.info("Usage: csvenricher in.csv out.csv email-for-nominatim@example.org");
             return;
         }
@@ -35,7 +35,6 @@ public class CsvEnricher {
         String email = args[2];
 
         //////////// READ DATA
-
         List<EdenredDataPoint> data = null;
         try {
             data = EdenredCsvIO.read(filenameIn);
@@ -44,22 +43,41 @@ public class CsvEnricher {
         } catch (CsvValidationException e) {
             logger.error("Couldn't parse CSV-file.");
         }
-        if(data != null) {
+
+        if (data != null) {
 
             //////////// ENRICH DATA WITH GEO-COORDINATES
+            int targetNo = data.size();
+            long startTime = System.currentTimeMillis();
+            logger.info("Starting to query nominatim for " + targetNo + " addresses.");
+            List<EdenredDataPoint> enrichedData = new LinkedList<EdenredDataPoint>();
+            for (EdenredDataPoint dp : data) {
+                enrichedData.add(enrichDataPoint(dp, email));
 
-            List<EdenredDataPoint> enrichedData = data.stream().map(dp -> enrichDataPoint(dp, email)).collect(Collectors.toList());
+                int currentNo = enrichedData.size();
+                long currentTime = System.currentTimeMillis();
+                double percentDone = currentNo * 100.0 / targetNo;
+                double spentSeconds = (currentTime - startTime) / 1000.0;
+                double totalDuration = spentSeconds * targetNo / currentNo;
+                double remainingSeconds = totalDuration - spentSeconds;
+                logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
+                        currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
+                try {
+                    Thread.sleep(1000); // to honor the nominatim rate limit
+                } catch (InterruptedException e) {
+                    logger.error("Nominatim rate-limit timeout was interrupted.");
+                }
+            }
+            data.stream().map(dp -> enrichDataPoint(dp, email)).collect(Collectors.toList());
 
             //////////// WRITE ENRICHED DATA
-            
             try {
                 EdenredCsvIO.write(filenameOut, enrichedData);
             } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
                 logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
                 e.printStackTrace();
             }
-
-            for(EdenredDataPoint dp : enrichedData){
+            for (EdenredDataPoint dp : enrichedData) {
                 logger.info("ENRICHED TO: " + dp.toString());
             }
         }
@@ -67,6 +85,7 @@ public class CsvEnricher {
 
     /**
      * Clone and add lon/lat if the reverse lookup was successful
+     * 
      * @param datapoint
      * @param email
      * @return
@@ -80,7 +99,6 @@ public class CsvEnricher {
         }
     }
 
-
     /**
      * @param datapoint
      * @param email
@@ -92,13 +110,12 @@ public class CsvEnricher {
         List<Address> reverseLookupResults;
         try {
             reverseLookupResults = nominatim.search(datapoint.getOnelineAddress());
-            if(reverseLookupResults.size() > 0) {
+            if (reverseLookupResults.size() > 0) {
                 Address a = reverseLookupResults.get(0);
                 return a;
             } else {
                 logger.debug("No results found on nominatim for: " + datapoint.getOnelineAddress());
             }
-
         } catch (IOException e) {
             logger.error("Couldn't establish connection to nominatim");
             e.printStackTrace();
