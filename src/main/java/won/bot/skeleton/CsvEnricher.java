@@ -27,12 +27,24 @@ public class CsvEnricher {
 
         //////////// PROCESS ARGS
         if (args.length != 3) {
-            logger.info("Usage: csvenricher in.csv out.csv email-for-nominatim@example.org");
+            logger.info("Usage: csvenricher <inputFile> <outputFile> <emailForNominatim> [<resumeFrom>]\n\n"
+                    + "e.g. csvenricher in.csv out.csv email-for-nominatim@example.org\n\n"
+                    + "inputFile: path to the input file\n"
+                    + "outputFile: path to the output file that the script will append to\n"
+                    + "emailForNominatim: the email-address used to identify yourself towards nominatim. "
+                    + "see their usage policy for more details: https://operations.osmfoundation.org/policies/nominatim/ "
+                    + "resumeFrom: in case the script got disrupted earlier, you can use pass this index to "
+                    + "resume from that point. Pass it $x+1 of the last \"Queried $x/$y\" output in "
+                    + "your log. Defaults to 1.");
             return;
         }
         String filenameIn = args[0];
         String filenameOut = args[1];
         String email = args[2];
+        int resumeFrom = 1;
+        if (args.length >= 4) {
+            resumeFrom = Integer.parseInt(args[3]);
+        }
 
         //////////// READ DATA
         List<EdenredDataPoint> data = null;
@@ -50,12 +62,18 @@ public class CsvEnricher {
             int targetNo = data.size();
             long startTime = System.currentTimeMillis();
             logger.info("Starting to query nominatim for " + targetNo + " addresses.");
-            List<EdenredDataPoint> enrichedData = new LinkedList<EdenredDataPoint>();
+            // List<EdenredDataPoint> enrichedData = new LinkedList<EdenredDataPoint>();
+            int currentNo = 0;
             for (EdenredDataPoint dp : data) {
+                currentNo++;
+                if (currentNo < resumeFrom) {
+                    // skip until we reach the resume-point
+                    continue;
+                }
                 EdenredDataPoint enriched = enrichDataPoint(dp, email);
-                enrichedData.add(enriched);
+                // enrichedData.add(enriched);
 
-                int currentNo = enrichedData.size();
+                // int currentNo = enrichedData.size();
                 long currentTime = System.currentTimeMillis();
                 double percentDone = currentNo * 100.0 / targetNo;
                 double spentSeconds = (currentTime - startTime) / 1000.0;
@@ -65,24 +83,24 @@ public class CsvEnricher {
                 logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
                         currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
                 logger.info("Enriched datapoint: " + enriched.toString() + "\n");
+
+                //////////// WRITE ENRICHED DATA
+                try {
+                    EdenredCsvIO.append(filenameOut, enriched);
+                } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
+                    logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
+                    e.printStackTrace();
+                }
                 try {
                     Thread.sleep(2000); // to honor the nominatim 1 per second absolute rate limit
                 } catch (InterruptedException e) {
                     logger.error("Nominatim rate-limit timeout was interrupted.");
                 }
             }
-            data.stream().map(dp -> enrichDataPoint(dp, email)).collect(Collectors.toList());
 
-            //////////// WRITE ENRICHED DATA
-            try {
-                EdenredCsvIO.write(filenameOut, enrichedData);
-            } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
-                logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
-                e.printStackTrace();
-            }
-            for (EdenredDataPoint dp : enrichedData) {
-                logger.info("ENRICHED TO: " + dp.toString());
-            }
+            // for (EdenredDataPoint dp : enrichedData) {
+            // logger.info("ENRICHED TO: " + dp.toString());
+            // }
         }
     }
 

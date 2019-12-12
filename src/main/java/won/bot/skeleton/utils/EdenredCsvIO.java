@@ -8,6 +8,8 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.opencsv.exceptions.CsvValidationException;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -20,11 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import won.bot.skeleton.impl.model.EdenredDataPoint;
 
-
-
-
-
-
 public class EdenredCsvIO {
     private static final Logger logger = LoggerFactory.getLogger(EdenredCsvIO.class);
 
@@ -32,28 +29,44 @@ public class EdenredCsvIO {
         // adapted from https://www.callicoder.com/java-read-write-csv-file-opencsv/
         logger.info("in loadCSV");
         List<EdenredDataPoint> results = new LinkedList<EdenredDataPoint>();
-        try (
-                        Reader csvReader = Files.newBufferedReader(Paths.get(filePath));) {
+        try (Reader csvReader = Files.newBufferedReader(Paths.get(filePath));) {
             CsvToBean<EdenredDataPoint> csvToBean = new CsvToBeanBuilder<EdenredDataPoint>(csvReader)
-                            .withType(EdenredDataPoint.class).build();
+                    .withType(EdenredDataPoint.class).build();
             Iterator<EdenredDataPoint> datapointIter = csvToBean.iterator();
-            while(datapointIter.hasNext()) {
+            while (datapointIter.hasNext()) {
                 results.add(datapointIter.next());
             }
         }
         return results;
     }
 
-    public static void write(String filename, List<EdenredDataPoint> datapoints) throws IOException,
-                    CsvDataTypeMismatchException,
-                    CsvRequiredFieldEmptyException {
+    public static void append(String filename, List<EdenredDataPoint> datapoints)
+            throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         // adapted from
         // https://www.callicoder.com/java-read-write-csv-file-opencsv/#generate-csv-file-from-list-of-objects
-        try (
-                        Writer writer = Files.newBufferedWriter(Paths.get(filename));) {
+        // and
+        // https://stackoverflow.com/questions/3741564/writing-at-the-end-of-a-file-via-opencsv
+        try (Writer appendingWriter = new FileWriter(filename, true);) {
+            StatefulBeanToCsv<EdenredDataPoint> beanToCsv = new StatefulBeanToCsvBuilder<EdenredDataPoint>(
+                    appendingWriter).withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
+            beanToCsv.write(datapoints);
+        }
+    }
+
+    public static void append(String filename, EdenredDataPoint datapoint)
+            throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        List<EdenredDataPoint> dps = new LinkedList<EdenredDataPoint>();
+        dps.add(datapoint);
+        append(filename, dps);
+    }
+
+    public static void write(String filename, List<EdenredDataPoint> datapoints)
+            throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        // adapted from
+        // https://www.callicoder.com/java-read-write-csv-file-opencsv/#generate-csv-file-from-list-of-objects
+        try (Writer writer = Files.newBufferedWriter(Paths.get(filename));) {
             StatefulBeanToCsv<EdenredDataPoint> beanToCsv = new StatefulBeanToCsvBuilder<EdenredDataPoint>(writer)
-                            .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
-                            .build();
+                    .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
             beanToCsv.write(datapoints);
         }
     }
