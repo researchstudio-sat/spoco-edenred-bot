@@ -52,7 +52,8 @@ public class CsvEnricher {
             logger.info("Starting to query nominatim for " + targetNo + " addresses.");
             List<EdenredDataPoint> enrichedData = new LinkedList<EdenredDataPoint>();
             for (EdenredDataPoint dp : data) {
-                enrichedData.add(enrichDataPoint(dp, email));
+                EdenredDataPoint enriched = enrichDataPoint(dp, email);
+                enrichedData.add(enriched);
 
                 int currentNo = enrichedData.size();
                 long currentTime = System.currentTimeMillis();
@@ -60,8 +61,10 @@ public class CsvEnricher {
                 double spentSeconds = (currentTime - startTime) / 1000.0;
                 double totalDuration = spentSeconds * targetNo / currentNo;
                 double remainingSeconds = totalDuration - spentSeconds;
+                logger.info("");
                 logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
                         currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
+                logger.info("Enriched datapoint: " + enriched.toString() + "\n");
                 try {
                     Thread.sleep(1500); // to honor the nominatim 1 per second absolute rate limit
                 } catch (InterruptedException e) {
