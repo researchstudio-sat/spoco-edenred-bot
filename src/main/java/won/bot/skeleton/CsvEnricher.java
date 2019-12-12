@@ -66,7 +66,7 @@ public class CsvEnricher {
                         currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
                 logger.info("Enriched datapoint: " + enriched.toString() + "\n");
                 try {
-                    Thread.sleep(1500); // to honor the nominatim 1 per second absolute rate limit
+                    Thread.sleep(2000); // to honor the nominatim 1 per second absolute rate limit
                 } catch (InterruptedException e) {
                     logger.error("Nominatim rate-limit timeout was interrupted.");
                 }
