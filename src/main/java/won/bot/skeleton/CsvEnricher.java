@@ -81,10 +81,11 @@ public class CsvEnricher {
                     double spentSeconds = (currentTime - startTime) / 1000.0;
                     double totalDuration = spentSeconds * targetNo / currentNo;
                     double remainingSeconds = totalDuration - spentSeconds;
-                    logger.info("");
+                    logger.info("#######################");
                     logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
                             currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
-                    logger.info("Enriched datapoint: " + enriched.toString() + "\n");
+                    logger.info("Enriched datapoint: " + enriched.toString());
+                    logger.info("#######################");
 
                     //////////// WRITE-APPEND ENRICHED DATA
                     try {
