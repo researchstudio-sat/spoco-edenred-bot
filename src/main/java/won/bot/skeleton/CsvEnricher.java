@@ -63,7 +63,7 @@ public class CsvEnricher {
                 logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
                         currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
                 try {
-                    Thread.sleep(1000); // to honor the nominatim rate limit
+                    Thread.sleep(1500); // to honor the nominatim 1 per second absolute rate limit
                 } catch (InterruptedException e) {
                     logger.error("Nominatim rate-limit timeout was interrupted.");
                 }
