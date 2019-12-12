@@ -122,10 +122,15 @@ public class CsvEnricher {
      * @return
      */
     public static EdenredDataPoint enrichDataPoint(EdenredDataPoint datapoint, String email) {
+        if (datapoint.getLongitude() != null && datapoint.getLatitude() != null) {
+            // already has lon/lat so we don't need to bother nominatim
+            return new EdenredDataPoint(datapoint);
+        }
         Address a = nominatimReverseLookup(datapoint, email);
         if (a != null) {
             return new EdenredDataPoint(datapoint, a.getLongitude(), a.getLatitude());
         } else {
+            // lookup failed for this datapoint
             return new EdenredDataPoint(datapoint);
         }
     }
