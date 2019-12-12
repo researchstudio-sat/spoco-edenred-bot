@@ -14,6 +14,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import won.bot.skeleton.impl.model.EdenredDataPoint;
+import won.bot.skeleton.utils.EdenredCsvAppendWriter;
 import won.bot.skeleton.utils.EdenredCsvIO;
 
 /**
@@ -35,7 +36,7 @@ public class CsvEnricher {
                     + "see their usage policy for more details: https://operations.osmfoundation.org/policies/nominatim/ "
                     + "resumeFrom: in case the script got disrupted earlier, you can use pass this index to "
                     + "resume from that point. Pass it $x+1 of the last \"Queried $x/$y\" output in "
-                    + "your log. Defaults to 1.");
+                    + "your log or the line-number-total of the output-file. Defaults to 1.");
             return;
         }
         String filenameIn = args[0];
@@ -57,51 +58,63 @@ public class CsvEnricher {
         }
 
         if (data != null) {
+            try (EdenredCsvAppendWriter writer = EdenredCsvIO.getAppendWriter(filenameOut);) {
 
-            //////////// ENRICH DATA WITH GEO-COORDINATES
-            int targetNo = data.size();
-            long startTime = System.currentTimeMillis();
-            logger.info("Starting to query nominatim for " + targetNo + " addresses.");
-            // List<EdenredDataPoint> enrichedData = new LinkedList<EdenredDataPoint>();
-            int currentNo = 0;
-            for (EdenredDataPoint dp : data) {
-                currentNo++;
-                if (currentNo < resumeFrom) {
-                    // skip until we reach the resume-point
-                    continue;
-                }
-                EdenredDataPoint enriched = enrichDataPoint(dp, email);
-                // enrichedData.add(enriched);
+                //////////// ENRICH DATA WITH GEO-COORDINATES
+                int targetNo = data.size();
+                long startTime = System.currentTimeMillis();
+                logger.info("Starting to query nominatim for " + targetNo + " addresses.");
+                // List<EdenredDataPoint> enrichedData = new LinkedList<EdenredDataPoint>();
+                int currentNo = 0;
+                for (EdenredDataPoint dp : data) {
+                    currentNo++;
+                    if (currentNo < resumeFrom) {
+                        // skip until we reach the resume-point
+                        continue;
+                    }
+                    EdenredDataPoint enriched = enrichDataPoint(dp, email);
+                    // enrichedData.add(enriched);
 
-                // int currentNo = enrichedData.size();
-                long currentTime = System.currentTimeMillis();
-                double percentDone = currentNo * 100.0 / targetNo;
-                double spentSeconds = (currentTime - startTime) / 1000.0;
-                double totalDuration = spentSeconds * targetNo / currentNo;
-                double remainingSeconds = totalDuration - spentSeconds;
-                logger.info("");
-                logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
-                        currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
-                logger.info("Enriched datapoint: " + enriched.toString() + "\n");
+                    // int currentNo = enrichedData.size();
+                    long currentTime = System.currentTimeMillis();
+                    double percentDone = currentNo * 100.0 / targetNo;
+                    double spentSeconds = (currentTime - startTime) / 1000.0;
+                    double totalDuration = spentSeconds * targetNo / currentNo;
+                    double remainingSeconds = totalDuration - spentSeconds;
+                    logger.info("");
+                    logger.info(String.format("Queried %d/%d (%.2f%%). time spent: %.2fs. time remaining: %.2fs.",
+                            currentNo, targetNo, percentDone, spentSeconds, remainingSeconds));
+                    logger.info("Enriched datapoint: " + enriched.toString() + "\n");
 
-                //////////// WRITE ENRICHED DATA
-                try {
-                    EdenredCsvIO.append(filenameOut, enriched);
-                } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
-                    logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
-                    e.printStackTrace();
+                    //////////// WRITE-APPEND ENRICHED DATA
+                    try {
+                        writer.write(enriched);
+                    } catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {
+                        logger.error("Failed to write csv. " + e.getMessage() + ". Stacktrace:\n");
+                        e.printStackTrace();
+                    }
+
+                    //////////// RESPECT NOMINATIM RATE LIMIT
+                    try {
+                        Thread.sleep(2000); // to honor the nominatim 1 per second absolute rate limit
+                    } catch (InterruptedException e) {
+                        logger.error("Nominatim rate-limit timeout was interrupted.");
+                    }
                 }
-                try {
-                    Thread.sleep(2000); // to honor the nominatim 1 per second absolute rate limit
-                } catch (InterruptedException e) {
-                    logger.error("Nominatim rate-limit timeout was interrupted.");
-                }
+
+            } catch (IOException e) {
+                logger.error("Couldn't open destination csv-file for writing. Destination file: " + filenameOut);
+                return;
             }
 
             // for (EdenredDataPoint dp : enrichedData) {
             // logger.info("ENRICHED TO: " + dp.toString());
             // }
         }
+    }
+
+    public static void enrichAndWriteProgressively() {
+
     }
 
     /**

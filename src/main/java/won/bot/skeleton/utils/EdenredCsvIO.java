@@ -25,6 +25,9 @@ import won.bot.skeleton.impl.model.EdenredDataPoint;
 public class EdenredCsvIO {
     private static final Logger logger = LoggerFactory.getLogger(EdenredCsvIO.class);
 
+    /**
+     * Reads a csv-file into a list of edenred-datapoints then closes the file.
+     */
     public static List<EdenredDataPoint> read(String filePath) throws CsvValidationException, IOException {
         // adapted from https://www.callicoder.com/java-read-write-csv-file-opencsv/
         logger.info("in loadCSV");
@@ -40,26 +43,21 @@ public class EdenredCsvIO {
         return results;
     }
 
-    public static void append(String filename, List<EdenredDataPoint> datapoints)
-            throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        // adapted from
-        // https://www.callicoder.com/java-read-write-csv-file-opencsv/#generate-csv-file-from-list-of-objects
-        // and
-        // https://stackoverflow.com/questions/3741564/writing-at-the-end-of-a-file-via-opencsv
-        try (Writer appendingWriter = new FileWriter(filename, true);) {
-            StatefulBeanToCsv<EdenredDataPoint> beanToCsv = new StatefulBeanToCsvBuilder<EdenredDataPoint>(
-                    appendingWriter).withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
-            beanToCsv.write(datapoints);
-        }
+    /**
+     * Gives you a writer, that can be used to append individual data-points.
+     * 
+     * @param filename
+     * @return
+     * @throws IOException
+     */
+    public static EdenredCsvAppendWriter getAppendWriter(String filename) throws IOException {
+        return new EdenredCsvAppendWriter(filename);
     }
 
-    public static void append(String filename, EdenredDataPoint datapoint)
-            throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        List<EdenredDataPoint> dps = new LinkedList<EdenredDataPoint>();
-        dps.add(datapoint);
-        append(filename, dps);
-    }
-
+    /**
+     * Writes an entire list of datapoints and then closes the file again. If the
+     * file already exists, it will overwrite it.
+     */
     public static void write(String filename, List<EdenredDataPoint> datapoints)
             throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         // adapted from
