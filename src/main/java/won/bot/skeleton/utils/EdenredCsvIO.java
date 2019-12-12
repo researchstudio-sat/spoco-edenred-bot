@@ -64,7 +64,7 @@ public class EdenredCsvIO {
         // https://www.callicoder.com/java-read-write-csv-file-opencsv/#generate-csv-file-from-list-of-objects
         try (Writer writer = Files.newBufferedWriter(Paths.get(filename));) {
             StatefulBeanToCsv<EdenredDataPoint> beanToCsv = new StatefulBeanToCsvBuilder<EdenredDataPoint>(writer)
-                    .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
+                    .build();
             beanToCsv.write(datapoints);
         }
     }

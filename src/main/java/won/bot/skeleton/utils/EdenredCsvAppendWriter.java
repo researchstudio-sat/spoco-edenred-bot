@@ -19,8 +19,7 @@ public class EdenredCsvAppendWriter implements AutoCloseable {
 
     public EdenredCsvAppendWriter(String filename) throws IOException {
         this.appendingWriter = new FileWriter(filename, true);
-        this.beanToCsv = new StatefulBeanToCsvBuilder<EdenredDataPoint>(appendingWriter)
-                .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
+        this.beanToCsv = new StatefulBeanToCsvBuilder<EdenredDataPoint>(appendingWriter).build();
     }
 
     public void write(EdenredDataPoint dp)
