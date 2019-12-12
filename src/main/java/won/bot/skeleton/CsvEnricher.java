@@ -106,10 +106,6 @@ public class CsvEnricher {
                 logger.error("Couldn't open destination csv-file for writing. Destination file: " + filenameOut);
                 return;
             }
-
-            // for (EdenredDataPoint dp : enrichedData) {
-            // logger.info("ENRICHED TO: " + dp.toString());
-            // }
         }
     }
 
