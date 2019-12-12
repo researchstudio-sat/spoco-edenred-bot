@@ -27,7 +27,7 @@ public class CsvEnricher {
     public static void main(String[] args) {
 
         //////////// PROCESS ARGS
-        if (args.length != 3) {
+        if (args.length < 3) {
             logger.info("Usage: csvenricher <inputFile> <outputFile> <emailForNominatim> [<resumeFrom>]\n\n"
                     + "e.g. csvenricher in.csv out.csv email-for-nominatim@example.org\n\n"
                     + "inputFile: path to the input file\n"
